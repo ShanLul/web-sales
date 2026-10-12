@@ -1,0 +1,65 @@
+# web-sales 后端服务单元（2 核 2G 目标）
+#
+# 安装位置：
+#   sudo cp deploy/systemd/web-sales-api.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now web-sales-api
+#
+# 查看日志：journalctl -u web-sales-api -f
+
+[Unit]
+Description=web-sales API (FastAPI + Uvicorn)
+Documentation=file:/opt/web-sales/README.md
+After=network-online.target mysql.service
+Wants=network-online.target
+# 与 MySQL 同生共死：MySQL 停了本服务也停，避免对外持续返回 500。
+# 注意：CentOS / RHEL 7+ 的单元名是 mysqld.service，需把下面两处一并改掉。
+Requires=mysql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/web-sales/backend
+
+# 环境变量集中在 .env，避免把密钥写进单元文件
+EnvironmentFile=/opt/web-sales/backend/.env
+# 兜底：即使 .env 缺失也能定位解释器与日志
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+
+# 2 worker + 并发上限：2 核机器上超过这个量只会让响应时间整体劣化
+ExecStart=/opt/web-sales/backend/.venv/bin/python -m uvicorn app.main:app \
+    --host 127.0.0.1 \
+    --port 8000 \
+    --workers 2 \
+    --limit-concurrency 100 \
+    --timeout-keep-alive 15 \
+    --no-server-header \
+    --proxy-headers \
+    --forwarded-allow-ips 127.0.0.1
+
+Restart=always
+RestartSec=3
+# 反复崩溃时不要疯狂重启拖垮机器
+StartLimitIntervalSec=60
+StartLimitBurst=5
+KillSignal=SIGINT
+TimeoutStopSec=20
+
+# ---- 资源与安全收敛 ----
+# 单个 worker 峰值按 256M 估；超过则重启而非 OOM 拖死整机
+MemoryMax=900M
+MemoryHigh=800M
+LimitNOFILE=8192
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=web-sales-api
+
+[Install]
+WantedBy=multi-user.target

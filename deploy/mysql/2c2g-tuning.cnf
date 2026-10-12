@@ -1,0 +1,47 @@
+# web-sales 生产 MySQL 8 调优片段（2 核 2G 目标）
+#
+# 安装位置（Ubuntu 22.04 / Debian）：
+#   sudo cp deploy/mysql/2c2g-tuning.cnf /etc/mysql/mysql.conf.d/zz-web-sales.cnf
+#   sudo systemctl restart mysql
+#
+# 说明：本文件只覆盖与默认值不同的项，其余保持发行版默认。
+# 关键取舍——2G 内存下宁可牺牲一部分持久性，也要保证不 OOM：
+#   innodb_flush_log_at_trx_commit=2 表示事务提交时写 OS 缓存、每秒刷盘，
+#   机器异常掉电可能丢最近 1 秒的事务，业务可接受。
+
+[mysqld]
+# ---- 字符集：全链路 utf8mb4，保证中文备注与 emoji 不乱码 ----
+character-set-server = utf8mb4
+collation-server     = utf8mb4_unicode_ci
+
+# ---- 内存：把有限内存都给缓冲池，但不与系统争抢 ----
+# 2G 机器上 256M 是安全值；若同时跑 Nginx + Uvicorn，不要再往上加
+innodb_buffer_pool_size = 256M
+innodb_buffer_pool_instances = 1
+# MySQL 8.0.30 起 innodb_log_file_size 已废弃，改用 innodb_redo_log_capacity（两者二选一）。
+# Ubuntu 22.04 自带的 8.0.x 仍接受下面这行；若使用 8.0.30+ / 8.4，请改为：
+#   innodb_redo_log_capacity = 128M
+innodb_log_file_size = 128M
+innodb_log_buffer_size = 8M
+
+# ---- 关闭一切非必要常驻开销 ----
+performance_schema = OFF
+mysqlx = 0
+
+# ---- 连接数：Uvicorn 2 worker 场景下 50 足够，避免每个连接都吃内存 ----
+max_connections = 50
+thread_cache_size = 16
+table_open_cache = 256
+
+# ---- 刷盘策略：牺牲最多 1 秒持久性换取写入吞吐 ----
+innodb_flush_log_at_trx_commit = 2
+innodb_flush_method = O_DIRECT
+sync_binlog = 0
+
+# ---- 慢查询：便于后续定位 2C2G 上的瓶颈 ----
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/slow.log
+long_query_time = 1
+
+[client]
+default-character-set = utf8mb4

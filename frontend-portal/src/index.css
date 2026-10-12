@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand: #0052d9;
+    --brand-light: #366ef4;
+    --brand-soft: #e3f0ff;
+
+    --td-brand-color: #0052d9;
+    --td-brand-color-light: #e3f0ff;
+    --td-radius-default: 8px;
+    --td-font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  }
+
+  html,
+  body,
+  #app {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    font-size: 14px;
+    color: #001529;
+    background-color: #f5f6f8;
+    -webkit-font-smoothing: antialiased;
+    /* 移动端点击高亮会破坏按钮质感，统一关闭 */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
+@layer components {
+  /* 所有可点击元素保证不小于 44px 触控高度 */
+  .touch-target {
+    @apply min-h-[44px];
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  /* 底部悬浮结算栏的毛玻璃质感 */
+  .glass-bar {
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: saturate(180%) blur(16px);
+    -webkit-backdrop-filter: saturate(180%) blur(16px);
+  }
+
+  .h5-card {
+    @apply rounded-xl border border-black/[0.05] bg-white shadow-card;
+  }
+}

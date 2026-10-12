@@ -1,0 +1,27 @@
+# ===== 通用 =====
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+
+# ===== 后端 =====
+backend/.venv/
+backend/.env
+__pycache__/
+*.py[cod]
+backend/logs/
+backend/*.db
+.pytest_cache/
+.mypy_cache/
+
+# ===== 前端 =====
+node_modules/
+dist/
+.vite/
+*.local
+frontend-admin/.env.local
+frontend-portal/.env.local
+
+# ===== 端到端验证产物 =====
+.playwright-cli/

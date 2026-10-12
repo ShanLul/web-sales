@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* 品牌主色：与 TDesign 变量对齐，保证组件与自定义区域颜色一致 */
+    --brand: #0052d9;
+    --brand-light: #366ef4;
+    --brand-soft: #e3f0ff;
+    --brand-deep: #002a6e;
+    --nav-bg: #001529;
+    --page-bg: #f3f3f3;
+
+    --td-brand-color: #0052d9;
+    --td-brand-color-hover: #366ef4;
+    --td-brand-color-active: #003cab;
+    --td-brand-color-focus: #e3f0ff;
+    --td-brand-color-light: #e3f0ff;
+    --td-brand-color-light-hover: #d3e5ff;
+    --td-radius-default: 6px;
+    --td-radius-medium: 8px;
+    --td-font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  }
+
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    font-size: 14px;
+    color: #000000;
+    background-color: var(--page-bg);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 21, 41, 0.16);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 21, 41, 0.3);
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer components {
+  /* 后台通用卡片：柔和阴影 + 悬浮微抬升 */
+  .admin-card {
+    @apply rounded-lg border border-black/[0.06] bg-white shadow-card transition-all duration-300;
+  }
+
+  .admin-card-hover:hover {
+    @apply -translate-y-0.5 shadow-float;
+  }
+
+  /* 表格数字等宽，金额右对齐时位数不跳动 */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  .page-title {
+    @apply text-[28px] font-semibold leading-9 text-ink;
+  }
+
+  .section-title {
+    @apply text-[18px] font-medium leading-7 text-ink;
+  }
+
+  .grid-texture {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+}
+
+/* TDesign 局部微调：让表格与卡片风格统一 */
+.t-table__header-wrapper th {
+  font-weight: 500;
+  color: #666666;
+  background-color: #fafbfc !important;
+}
+
+.t-table tbody tr:hover td {
+  background-color: #f5f9ff !important;
+}
+
+.t-drawer__header {
+  font-weight: 600;
+}
